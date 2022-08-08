@@ -1,19 +1,31 @@
 const fs = require('fs');
 var osu = require('node-os-utils');
-var argv = require('minimist')
+const { program } = require('commander');
 const NodeHog = require('nodehog');
 const { isRunning } = require('./isRunning');
+
+program
+  .option('-m, --memoryInterval')
+  .option('-c, --cpuInterval')
+  .option('-f, --function');
+
+program.parse();
+
+const options = program.opts();
+console.log(options);
 
 var cpu = osu.cpu
 var mem = osu.mem
 
 //isRunning('zoom.exe', 'zoom.us', 'NA').then((v) => console.log(v))
 
-// output stream for memory usage baseline
-var memBaseline = fs.createWriteStream("memBasline.txt", {flags:'a'});
+// clear file and create output stream for memory usage
+fs.writeFile('cpuUsage.txt', ' ', () => {});
+var memUsage = fs.createWriteStream('memUsage.txt', {flags:'a'});
 
-// output stream for cpu usage baseline
-var cpuBaseline = fs.createWriteStream("cpuBasline.txt", {flags:'a'});
+// clear file and output stream for cpu usage
+fs.writeFile('cpuUsage.txt', ' ', () => {});
+var cpuUsage = fs.createWriteStream('cpuUsage.txt', {flags:'a'});
 
 // stress test that stresses the the cpu in 2 second intervals for 5 minutes
 function startStressTest() {
@@ -25,21 +37,22 @@ function startStressTest() {
 function getMemUsage() {
   mem.info()
     .then(info => {
-      memBaseline.write(info.usedMemMb + "\n");
+      memUsage.write(info.usedMemMb + "\n");
   })
 }
 
 // function that returns average cpu usage over a 15 second interval
+// TODO: figure out best interval that will work with cpuInterval
 function getCPUUsage() {
   cpu.usage(15000)
     .then(info => {
-      cpuBaseline.write(info + "\n");
+      cpuUsage.write(info + "\n");
   })
 }
 
 // start collecting data and writing to output files every 15 seconds
-const memInterval = setInterval(getMemUsage, 15000);
-const cpuInterval = setInterval(getCPUUsage, 15000);
+const memInterval = setInterval(getMemUsage, options.memoryInterval);
+const cpuInterval = setInterval(getCPUUsage, options.cpuInterval);
 
 // start polling once per minute to see if zoom is an active process
 setInterval(() => {
