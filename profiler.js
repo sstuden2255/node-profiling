@@ -1,7 +1,7 @@
 const fs = require('fs');
 var osu = require('node-os-utils');
 const NodeHog = require('nodehog');
-const { isRunning } = require('./processChecker');
+const { isRunning } = require('./isRunning');
 
 var cpu = osu.cpu
 var mem = osu.mem
