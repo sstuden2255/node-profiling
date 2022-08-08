@@ -1,5 +1,6 @@
 const fs = require('fs');
 var osu = require('node-os-utils');
+var argv = require('minimist')
 const NodeHog = require('nodehog');
 const { isRunning } = require('./isRunning');
 
