@@ -1,37 +1,28 @@
 const fs = require('fs');
 var osu = require('node-os-utils');
-const { program } = require('commander');
-const NodeHog = require('nodehog');
+const { argv } = require('minimist');
 const { isRunning } = require('./isRunning');
-
-program
-  .option('-m, --memoryInterval')
-  .option('-c, --cpuInterval')
-  .option('-f, --function');
-
-program.parse();
-
-const options = program.opts();
-console.log(options);
 
 var cpu = osu.cpu
 var mem = osu.mem
 
-//isRunning('zoom.exe', 'zoom.us', 'NA').then((v) => console.log(v))
+// -m flag is for memory usage file name, -c flag is for cpu usage file name, -p flag defines whether we use profiler or not
+// TODO: error Checking - validate parameters
+const memUsageFile = argv.mf;
+const cpuUsageFile = argv.cf;
+const cpuIntrvl = arv.ci;
+const memIntrvl  = argv.mi;
+const pollIntrvl = argv.pi;
+const isPolling = argv.p;
+const totalRuntime = (argv.r * 1000); // This runtime is passed in as seconds
 
-// clear file and create output stream for memory usage
-fs.writeFile('cpuUsage.txt', ' ', () => {});
-var memUsage = fs.createWriteStream('memUsage.txt', {flags:'a'});
+// clear the output file and create an output stream for memory usage baseline
+fs.writeFile(memUsageFile, '', () => {});
+var memUsage = fs.createWriteStream(memUsageFile, {flags:'a'});
 
-// clear file and output stream for cpu usage
-fs.writeFile('cpuUsage.txt', ' ', () => {});
-var cpuUsage = fs.createWriteStream('cpuUsage.txt', {flags:'a'});
-
-// stress test that stresses the the cpu in 2 second intervals for 5 minutes
-function startStressTest() {
-    new NodeHog('cpu', 2000, 2000, 75).start();
-    new NodeHog('memory', 2000, 2000, 75).start();
-}
+// clear the output file and create an output stream for cpu usage baseline
+fs.writeFile(cpuUsageFile, '', () => {});
+var cpuUsage = fs.createWriteStream(cpuUsageFile, {flags:'a'});
 
 // function that returns average memory usage over 1 second interval
 function getMemUsage() {
@@ -44,31 +35,40 @@ function getMemUsage() {
 // function that returns average cpu usage over a 15 second interval
 // TODO: figure out best interval that will work with cpuInterval
 function getCPUUsage() {
-  cpu.usage(15000)
+  cpu.usage(cpuIntrvl)
     .then(info => {
       cpuUsage.write(info + "\n");
   })
 }
 
-// start collecting data and writing to output files every 15 seconds
-const memInterval = setInterval(getMemUsage, options.memoryInterval);
-const cpuInterval = setInterval(getCPUUsage, options.cpuInterval);
+let memInterval ;
+let cpuInterval;
+let pollingInterval;
 
-// start polling once per minute to see if zoom is an active process
-setInterval(() => {
-  isRunning('zoom.exe', 'zoom.us', 'NA')
-}, 60000);
+// wait 5 seconds and then start collecting data and writing to output files in intervals defined by user
+setTimeout(() => {
+  memInterval = setInterval(getMemUsage, memIntrvl);
+  cpuInterval = setInterval(getCPUUsage, cpuIntrvl);
+}, 5000)
 
-// start stress test after 5 minutes
-// setTimeout(() => {
-//     startStressTest()
-//   }, 300000)
+// start polling in interval defined by user
+if (isPolling) {
+  pollingInterval = setInterval(() => {
+    isRunning('zoom.exe', 'zoom.us', 'NA')
+  }, pollIntrvl);
+}
 
 // stop collecting data
 setTimeout(() => {
     clearInterval(memInterval)
-  }, 1800000);
+  }, totalRuntime);
 
 setTimeout(() => {
-    clearInterval(cpuInterval)
-  }, 1800000);
+      clearInterval(cpuInterval)
+  }, totalRuntime);
+
+if (isPolling) {
+  setTimeout(() => {
+    clearInterval(pollingInterval)
+  }, totalRuntime);
+}
