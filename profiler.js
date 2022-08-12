@@ -6,15 +6,14 @@ const { isRunning } = require('./isRunning');
 var cpu = osu.cpu
 var mem = osu.mem
 
-// -m flag is for memory usage file name, -c flag is for cpu usage file name, -p flag defines whether we use profiler or not
-// TODO: error Checking - validate parameters
-const memUsageFile = argv.mf;
-const cpuUsageFile = argv.cf;
-const cpuIntrvl = arv.ci;
-const memIntrvl  = argv.mi;
-const pollIntrvl = argv.pi;
-const isPolling = argv.p;
-const totalRuntime = (argv.r * 1000); // This runtime is passed in as seconds
+// TODO: error Checking - validate parameters - do two letter flags work?
+const memUsageFile = argv.mf; //TODO: make sure this is a filename.txt
+const cpuUsageFile = argv.cf; //TODO: make sure this is a filename.txt
+const cpuIntrvl = arv.ci; //TODO: make sure this is an integer (ms)
+const memIntrvl  = argv.mi; //TODO: make sure this is an integer (ms)
+const pollIntrvl = argv.pi; //TODO: make sure this is an integer (ms)
+const isPolling = argv.p; //TODO: make sure there are no arguments to this flag
+const totalRuntime = argv.r; // TODO: make sure this is an integer (ms)
 
 // clear the output file and create an output stream for memory usage baseline
 fs.writeFile(memUsageFile, '', () => {});

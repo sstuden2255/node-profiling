@@ -18,6 +18,4 @@ function isRunning(win, mac, linux){
     })
 }
 
-//isRunning('zoom.exe', 'zoom.us', 'NA').then((v) => console.log(v))
-
 module.exports = { isRunning }
