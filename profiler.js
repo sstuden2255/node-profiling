@@ -1,7 +1,10 @@
 const fs = require('fs');
 var osu = require('node-os-utils');
 const { argv } = require('minimist');
-const { isRunning } = require('./isRunning');
+const { isRunning } = require('./isRunning'); //TODO: remove at some point
+
+//TODO: test and make sure this works to pass in any script
+//const profileScript = require(`./${argv.s}`)
 
 var cpu = osu.cpu
 var mem = osu.mem
@@ -53,6 +56,7 @@ setTimeout(() => {
 // start polling in interval defined by user
 if (isPolling) {
   pollingInterval = setInterval(() => {
+    //TODO: change this to an exec that runs 'node profileScript'
     isRunning('zoom.exe', 'zoom.us', 'NA')
   }, pollIntrvl);
 }

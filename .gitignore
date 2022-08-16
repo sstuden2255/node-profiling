@@ -1,2 +1,8 @@
-# Dependency directorie
+# Dependency directories
 node_modules/
+# End Dependency directories
+
+# Packaged Executables
+profiler.app
+profiler.exe
+# End Packaged Executables
